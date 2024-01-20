@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+    <title> Карточка клиента </title>
+    {% macro render_table(table_name, relation, id) %}
+    <p>
+        <b>{{table_name}} </b>
+    </p>
+    {% set n = len(relation) %}
+    <table>
+            <tr>
+                {% for name in relation.dtypes.index %}
+                    {% if name != id %}
+                        <th>{{name}}</th>
+                    {% endif %}
+                {% endfor %}
+                <th>Отменить?</th>
+            </tr>
+        <tbody>
+            {% for i in range(n) %}
+                <tr>
+                    {% for name in relation.dtypes.index %}
+                        {% if name != id %}
+                        <td>
+                            {% if not relation.loc[i, name] %}
+                                <form action = '' method ="get">
+                                    <input type="hidden" name = "return_val" value={{relation.loc[i, "excursion_client_id"]}}>
+                                    <input type="submit" name = "return" value="Я вернулся">
+                                </form>
+                            {% else %}
+                                {{ relation.loc[i, name] }}
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    {% endfor %}
+                    <td>
+                        <form action="" method="get">
+                            <input type="text" value="{{relation.loc[i, 'excursion_client_id']}}" name="excursion_client_id" hidden />
+                            <input type="submit" name="delete" value="Отмена" />
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endmacro %}
+
+    {% macro render_select(select_name, vis_field, val_field, combo_box, id) %}           
+        <select name='{{select_name}}'>          
+            {% for i in range(len(combo_box)) %}   
+                <option value="{{ combo_box.loc[i, val_field] }}" {% if combo_box.loc[i, val_field] == id %} selected {% endif %}>{{combo_box.loc[i, vis_field]}}</option>          
+                    {% endfor %}         
+                </select> 
+    {% endmacro %}
+</head>
+<body>
+    <div class=menu>
+        <ul>
+            <li class = active><a href={{ url_for("index")}}>Клиент</a></li>
+        </ul>
+    </div>
+    <div class=block>
+        <p>
+        <form action='' method ="get">
+        Клиент:
+            {{ render_select("client", "client_name", "client_id", combo_box, client_id) }}
+        <input type="submit" value="Найти">
+        </form>
+        </p>
+        <form action ="{{url_for('new_reader')}}" method="get">
+            <input type="submit" value="Новый клиент">
+        </form>
+        {{ render_table("Карточка", excursion_client, "excursion_client_id") }}
+        <form action ={{url_for('search')}} method="get">
+            <input type="submit" value="Забронировать">
+        </form> 
+    </div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+    <title> Поиск экскурсии </title>
+    {% macro render_checkbox(relation, selected_list, name) %}
+        {% for i in range(relation|length) %}
+            {% set value = relation.loc[i, relation.dtypes.index[0]] %}
+            <div class="flex row">
+            <input 
+                type="checkbox" 
+                name="{{name}}" 
+                value="{{value}}" 
+                {% if value in selected_list %} checked="checked" {% endif %}
+            />{{value + " (" + relation.loc[i, relation.dtypes.index[1]]|string + ")"}}
+            </div>
+        {% endfor %}
+    {% endmacro %}
+
+    {% macro render_excursion(df_excursion) %}
+        {% for i in range(df_excursion|length) %}
+            <div class="flex column width50">
+                <p>Название: {{df_excursion.loc[i, "title"]}}</p>
+                <p>Организаторы: {{df_excursion.loc[i, "organizator"]}}</p>
+                <p>Гид: {{df_excursion.loc[i, "guide_name"]}}</p>
+                <p>Тип: {{df_excursion.loc[i, "typeExcursion_name"]}}</p>
+                <p>Наличие мест: {{df_excursion.loc[i, "available_numbers"]}}</p>
+                <p>excursion_name_id: {{df_excursion.loc[i, "excursion_id"]}}</p>
+                <form action='{{url_for("index")}}' method ="get">
+                    <p>{{i}}</p>
+                    <input type="hidden" value="{{df_excursion.loc[i, 'excursion_id']}}" name="excursion">
+                    <input type="submit" value="Выбрать" {% if not df_excursion.loc[i, "available_numbers"] %} disabled="disabled" {% endif %}>
+                </form> 
+            </div> 
+        {% endfor %}
+    {% endmacro %}
+</head>
+<body>
+    <div class=menu>
+        <ul>
+            <li class = active><a href={{ url_for("search")}}>Поиск экскурсии</a></li>
+        </ul>
+    </div>
+    <div class=block>
+        <p>
+            <form action='' method ="post">
+                <div class="flex row">
+                    <div class="flex column width15">
+                        <div class="flex column">
+                            <details><summary>Организатор</summary>{{ render_checkbox(df_organizator, selected_organizator, "organizator") }}</details>
+                            <details><summary>Гид</summary>{{ render_checkbox(df_guide, selected_guide, "guide")}}</details>
+                            <details><summary>Тип</summary>{{ render_checkbox(df_typeExcursion, selected_typeExcursion, "typeExcursion")}}</details>
+                        </div>
+                        <input type="submit" value="Очистить" name="reset" />
+                        <input type="submit" value="Применить" name="confirm" />
+                    </div>
+                    <div class="flex column width85">
+                        <div class="flex column">
+                            <div class="block">
+                                {% if selected_organizator %}
+                                    Организатор: {{", ".join(selected_organizator)}} <br>
+                                {% endif %}
+                                {% if selected_guide %}
+                                    Гид: {{", ".join(selected_guide)}} <br>
+                                {% endif %}
+                                {% if selected_typeExcursion %}
+                                    Тип: {{", ".join(selected_typeExcursion)}}
+                                {% endif %}
+                            </div>
+            </form>
+                            <div class="flex row wrap">
+                                {{ render_excursion(df_excursion) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            <form action='{{url_for("index")}}' method ="get">
+                <input type="submit" value="Не выбирать экскурсию" />
+            </form> 
+        </p>
+    </div>
+</body>
+</html>
